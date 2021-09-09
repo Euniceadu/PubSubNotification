@@ -34,13 +34,13 @@ public class Controller {
 
     @RequestMapping(value = "/create/{topic}", method = RequestMethod.POST)
     @ResponseBody
-    public String createTopic(@PathVariable(value = "topic") String topic) {
+    public PublishResponse createTopic(@PathVariable(value = "topic") String topic) {
         Topic topicObject = topicRepository.findByName(topic);
         if (null == topicObject) {
             topicRepository.save(new Topic(topic));
-            return "Topic " + topic + " created successfully";
+            return new PublishResponse("Topic " + topic + " created successfully", true);
         } else {
-            return "Topic " + topic + " already exists";
+            return new PublishResponse("Topic " + topic + " already exists", false);
         }
     }
 
@@ -48,17 +48,17 @@ public class Controller {
     @ResponseBody
     public SubscribeResponse createSubscription(@PathVariable(value = "topic") String topic, @RequestBody SubscribeParams params) {
         if (null == params.getUrl() || params.getUrl().equals("")) {
-            return new SubscribeResponse("Subscriber url cannot be null or empty");
+            return new SubscribeResponse("Subscriber url cannot be null or empty", false);
         }
 
         Topic topicObject = topicRepository.findByName(topic);
         if (null == topicObject) {
-            return new SubscribeResponse("Topic does not exist");
+            return new SubscribeResponse("Topic does not exist", false);
         } else {
             List<Subscriber> subscribers = topicObject.getSubscribers();
             for (Subscriber subscriber: subscribers) {
                 if (params.getUrl().equals(subscriber.getUrl())) {
-                    return new SubscribeResponse(params.getUrl(), topic);
+                    return new SubscribeResponse(params.getUrl(), topic, true);
                 }
             }
             Subscriber subscriber = subscriberRepository.save(new Subscriber(params.getUrl(), topicObject));
@@ -67,7 +67,7 @@ public class Controller {
             topicObject.setSubscribers(subscribers);
             topicRepository.save(topicObject);
 
-            return new SubscribeResponse(params.getUrl(), topic);
+            return new SubscribeResponse(params.getUrl(), topic, true);
 
         }
     }
@@ -78,13 +78,13 @@ public class Controller {
     public PublishResponse publishMessage(@PathVariable(value = "topic") String topic, @RequestBody Object data) {
         Topic topicObject = topicRepository.findByName(topic);
         if (null == topicObject) {
-            return new PublishResponse("Topic does not exist");
+            return new PublishResponse("Topic does not exist", false);
         } else {
             List<Subscriber> subscribers = topicObject.getSubscribers();
             for (Subscriber subscriber: subscribers) {
                 makeRequest(subscriber.getUrl(), data);
             }
-            return new PublishResponse("");
+            return new PublishResponse("Message published successfully", true);
         }
     }
 

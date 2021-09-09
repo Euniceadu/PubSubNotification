@@ -5,18 +5,21 @@ public class SubscribeResponse {
 
     private final String url;
     private final String topic;
-    private final String errorMessage;
+    private final String message;
+    private final boolean success;
 
-    public SubscribeResponse(String url, String topic) {
+    public SubscribeResponse(String url, String topic, boolean success) {
         this.url = url;
         this.topic = topic;
-        this.errorMessage = null;
+        this.message = null;
+        this.success = success;
     }
 
-    public SubscribeResponse(String errorMessage) {
+    public SubscribeResponse(String message, boolean success) {
         this.url = null;
         this.topic = null;
-        this.errorMessage = errorMessage;
+        this.message = message;
+        this.success = success;
     }
 
 
@@ -28,7 +31,11 @@ public class SubscribeResponse {
         return topic;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public String getMessage() {
+        return message;
+    }
+
+    public boolean isSuccess() {
+        return success;
     }
 }
